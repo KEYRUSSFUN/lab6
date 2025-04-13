@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_Слой_1" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 154.05 36">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ffe15c;
+      }
+
+      .cls-1, .cls-2 {
+        stroke-width: 0px;
+      }
+
+      .cls-3 {
+        font-family: Bahnschrift, Bahnschrift;
+        font-variation-settings: 'wght' 400, 'wdth' 100;
+      }
+
+      .cls-3, .cls-4 {
+        font-size: 24px;
+      }
+
+      .cls-4 {
+        fill: none;
+        font-family: SnapITC-Regular, 'Snap ITC';
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-2 {
+        fill: #b43d2a;
+      }
+    </style>
+    <clipPath id="clippath">
+      <text class="cls-4" transform="translate(13.99 27.5)"><tspan x="0" y="0">F</tspan></text>
+    </clipPath>
+  </defs>
+  <g>
+    <circle class="cls-2" cx="22.68" cy="18" r="17.5"/>
+    <path class="cls-1" d="M22.68,1c9.37,0,17,7.63,17,17s-7.63,17-17,17S5.68,27.37,5.68,18,13.3,1,22.68,1M22.68,0C12.74,0,4.68,8.06,4.68,18s8.06,18,18,18,18-8.06,18-18S32.62,0,22.68,0h0Z"/>
+  </g>
+  <g class="cls-5">
+    <image width="866" height="624" transform="translate(0 .93) scale(.06)" xlink:href="F:\Загрузки\M1Qf-Pf-AZA.jpg"/>
+  </g>
+  <text class="cls-3" transform="translate(48.63 27.24)"><tspan x="0" y="0">Fast Food</tspan></text>
+</svg>

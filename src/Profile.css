@@ -1,0 +1,132 @@
+.profile-container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 30px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+  
+.profile-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #d45c4a;
+    font-weight: 600;
+}
+  
+.profile-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.profile-input {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #444;
+    transition: border-color 0.3s ease;
+}
+
+.profile-input:focus {
+    outline: none;
+    border-color: #FADB79;
+    box-shadow: 0 2px 6px rgba(250, 219, 121, 0.3);
+}
+
+.profile-button {
+    padding: 14px 24px;
+    background-color: #d45c4a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+}
+
+.profile-button:hover {
+    background-color: #c45242;
+}
+
+.profile-error {
+    color: #d45c4a;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.profile-success {
+    color: #28a745;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+
+.profile-section {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 20px;
+}
+
+.profile-section:last-child {
+    border-bottom: none;
+}
+
+.profile-section-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #555;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .profile-title {
+        font-size: 24px;
+    }
+
+    .profile-input {
+        font-size: 15px;
+    }
+
+    .profile-button {
+        font-size: 15px;
+    }
+}
+
+.profile-email-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+.profile-password-toggle:hover {
+    color: #555;
+}
+
+.fa {
+    font-size: 18px;
+}

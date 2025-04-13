@@ -1,0 +1,79 @@
+.FeedbackButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 1000; /* Убедитесь, что кнопка выше других элементов */
+    transition: background-color 0.3s ease;
+}
+  
+.FeedbackButton:hover {
+    background-color: #0056b3;
+}
+
+.FeedbackFormContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 90px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    width: 300px;
+    z-index: 999;
+    display: none;
+    border-radius: 8px;
+}
+
+.FeedbackFormContainer.active {
+    display: inline-block;
+}
+
+.FormInput {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.FormTextArea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.FormButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.FormButton:hover {
+    background-color: #218838;
+}
+
+.ReviewsButton {
+    background-color: #17a2b8;
+}
+
+.ReviewsButton:hover {
+    background-color: #138496;
+}

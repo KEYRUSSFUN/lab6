@@ -1,0 +1,132 @@
+*,body {
+  padding: 0;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.header__background {
+  width: 100%;
+  height: 55px;
+  box-shadow: 0px 1px 0px 0px rgba(214, 213, 213, 0.5);
+}
+
+.header__container {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1550px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.header__logo-side {
+  display: flex;
+  align-items: center;
+}
+
+.header__logo-side.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-logo {
+  height: 40px;
+  cursor: pointer;
+}
+
+.header__aunth-side {
+  display: flex;
+  height: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.login-button:active,
+.login-button {
+  color: #000000de;
+  font-size: 14px;
+  padding: 5px 20px;
+  cursor: pointer;
+  border-right: 1px solid #0000003b;
+  text-decoration: none;
+}
+
+.signup-button:active,
+.signup-button {
+  color: #000000de;
+  padding: 5px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid #d45c4a;
+  text-decoration: none;
+}
+
+.go__back-button {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+}
+
+.signup-button:hover {
+  background-color: #d45c4a;
+  color: white;
+}
+
+.header__aunth-side.login {
+  text-decoration: none;
+}
+
+.header__profile {
+  position: relative;
+  background-color: #2929293b;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.header__profile:hover > .header__logout {
+  display: block;
+}
+
+.header__logout {
+  display: none;
+  bottom: -60%;
+  right: 0;
+  position: absolute;
+  border: 1px solid #0000003b;
+  padding: 5px 20px;
+  border-radius: 5px;
+}
+
+.error__notification {
+  margin-top: 30px;
+  border-radius: 10px;
+  border: 1px solid rgb(255, 66, 66);
+  padding: 15px 20px;
+  background-color: rgba(255, 66, 66, 0.315);
+  font-weight: bold;
+  color: rgb(255, 66, 66);
+  text-align: center;
+}
+
+.success__notification {
+  margin-top: 30px;
+  border-radius: 10px;
+  border: 1px solid rgb(133, 245, 69);
+  padding: 15px 20px;
+  background-color: rgba(134, 245, 69, 0.253);
+  font-weight: bold;
+  color: rgb(133, 245, 69);
+  text-align: center;
+}
+
+.header__menu {
+  display: flex;
+  align-items: center;
+}
+
+.header__menu-list {
+}
+.menu-item {
+}
