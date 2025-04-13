@@ -1,25 +1,144 @@
-import React, { useEffect } from 'react';
-import "../Login.css";
-import Logo from "../assets/logo/FASTFOODLOGO.svg";
-import { useForm} from 'react-hook-form';
+
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { signinAccountAsync, fetchProfile } from '../reducers/user';
+import Logo from "../assets/logo/FASTFOODLOGO.svg";
 import Loader from "../assets/img/loadingCircle.svg";
+
+import { styled } from '@mui/material/styles';
+import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import MuiAlert from '@mui/material/Alert';
+
+
+const LoginPageContainer = styled(Box)({
+  fontFamily: "'Roboto', sans-serif",
+  margin: 0,
+  background: "#f0f4f8",
+  minHeight: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  color: "#333",
+});
+
+const LoginContainer = styled(Container)({
+  background: "#fff",
+  borderRadius: "12px",
+  boxShadow: "0 8px 20px rgba(0, 0, 0, 0.1)",
+  width: "450px",
+  padding: "50px",
+  textAlign: "left",
+  transition: "all 0.3s ease",
+});
+
+const StyledTextField = styled(TextField)({
+  width: "100%",
+  marginBottom: "30px",
+  "& .MuiInputBase-root": {
+    borderRadius: "8px",
+    background: "#ecf0f1",
+  },
+  "& .MuiInputBase-input": {
+    padding: "20px",
+    border: "none",
+    color: "#333",
+    fontSize: "1rem",
+    boxSizing: "border-box",
+    transition: "all 0.3s ease",
+    "&:focus": {
+      outline: "none",
+      background: "#fff",
+      boxShadow: "0 0 5px rgba(0, 0, 0, 0.2)",
+      borderColor: '#FADB79',
+    },
+  },
+  "& .MuiFormLabel-root": {
+    backgroundColor: "transparent",
+    marginLeft: "5px",
+    top: "-8px",
+    fontSize: "1rem",
+    fontWeight: 500,
+    color: "#999",
+    pointerEvents: "none",
+    transition: "all 0.3s ease",
+    transformOrigin: 'top left',
+  },
+});
+
+const SigninButton = styled(Button)({
+  background: "#d45c4a",
+  color: "#fff",
+  padding: "5px 30px",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontSize: "1.1rem",
+  fontWeight: 600,
+  transition: "all 0.3s ease",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  width: "100%",
+  "&:hover": {
+    background: "#df6451",
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+  },
+});
+
+const RegisterLink = styled(Typography)({
+  display: "block",
+  marginTop: "0px",
+  color: "black",
+  textDecoration: "none",
+  fontWeight: 500,
+  textAlign: "center",
+  transition: "color 0.3s ease",
+  "&:hover": {
+    color: "black",
+    textDecoration: "underline",
+    cursor: 'pointer',
+  },
+});
+
+const ErrorMessage = styled(Typography)({
+  color: "#e74c3c",
+  fontSize: "0.9rem",
+  marginTop: "8px",
+  textAlign: "left",
+});
+
+const Alert = styled(MuiAlert)({
+    marginTop: '10px',
+    marginBottom: '10px',
+});
+
+const LogoImage = styled('img')({
+  height: '40px',
+  cursor: 'pointer',
+  marginBottom: '20px',
+});
+
+const LoadingImage = styled('img')({
+    height: '40px',
+});
+
+
 const LoginForm = () => {
-
   const { register, handleSubmit, formState: { errors } } = useForm();
-
-  const { isAuthenticated, error, loading} = useSelector((state) => state.user);
-
+  const { isAuthenticated, error, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const onSubmit = async (data) => { 
+  const onSubmit = async (data) => {
     try {
-      await dispatch(signinAccountAsync({email : data.email, password: data.password})).unwrap();
-    } catch (error) {
-      console.error("Ошибка при входе:", error);
+      await dispatch(signinAccountAsync({ email: data.email, password: data.password })).unwrap();
+    } catch (err) {
+      console.error("Ошибка при входе:", err);
     }
   };
 
@@ -28,55 +147,80 @@ const LoginForm = () => {
       dispatch(fetchProfile());
       navigate('/');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, dispatch]);
 
-  const toRegister = (() => {
+  const toRegister = () => {
     navigate("/signup");
-  })
+  };
+
 
   return (
-    <div className="login__page-container">
-      <div class="login-container">
-        <div className="go__back-button">
-        </div>
-        <div className="header__logo-side center">
-          <img src={Logo} alt="" className="header-logo" />      
-        </div>
-        <br />
-        <br />
+    <LoginPageContainer component="main">
+      <LoginContainer maxWidth="sm">
+        <Box display="flex" flexDirection="column" alignItems="center">
+            <RouterLink to="/">
+                <LogoImage src={Logo} alt="Logo" />
+            </RouterLink>
+        </Box>
+
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="form-group">
-            <input type="email" id="email" name="email" placeholder="" {...register('email', { 
+          <StyledTextField
+            fullWidth
+            label="Email"
+            margin="normal"
+            {...register('email', {
               required: 'Email обязателен',
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Неверный формат email'
-              }
-             })} />
-            <label for="email">Email</label>
-            <div class="error-message">{errors?.email && <span style={{color: 'red'}}>{errors.email.message}</span>}</div>
-          </div>
-          <div class="form-group">
-            <input type="password" id="password" name="password" placeholder="" {...register("password", {
+                message: 'Неверный формат email',
+              },
+            })}
+            error={!!errors.email}
+            helperText={errors.email ? errors.email.message : ""}
+          
+          />
+
+          <StyledTextField
+            fullWidth
+            label="Пароль"
+            type="password"
+            margin="normal"
+            {...register("password", {
               required: "Пароль обязателен для заполнения",
-              minLength:{
-              value: 6,
-              message: "Пароль должен содержать не менее 6 символов"
-              }
-              })} />
-            <label for="password">Пароль</label>
-            <div class="error-message">{errors?.password && <span style={{color: 'red'}}>{errors.password.message}</span>}</div>
-          </div>
-          <div className="form-group">
-          {loading ? (<img className='spinner' src={Loader} alt="Загрузка..." />) : (error && <div className="error__notification" >{error}</div>)}
-          </div>
-          <button type="submit" class="signin-button">Войти</button>
+              minLength: {
+                value: 6,
+                message: "Пароль должен содержать не менее 6 символов",
+              },
+            })}
+            error={!!errors.password}
+            helperText={errors.password ? errors.password.message : ""}
+          
+          />
+
+          <SigninButton type="submit" variant="contained" fullWidth>
+            Войти
+          </SigninButton>
+
+          {loading ? (
+            <Box display="flex" justifyContent="center" mt={2}>
+              <LoadingImage src={Loader} alt="Загрузка..." />
+            </Box>
+          ) : (
+            error && (
+              <Alert severity="error">
+                {error}
+              </Alert>
+            )
+          )}
         </form>
-        <a onClick={toRegister} href="#" class="register-link">Зарегистрироваться</a>
-        
-      </div>
-    </div>
-    
+
+        <Box display="flex" justifyContent="center" mt={3}>
+          <RegisterLink onClick={toRegister} style={{cursor: 'pointer'}}>
+            Зарегистрироваться
+          </RegisterLink>
+        </Box>
+      </LoginContainer>
+    </LoginPageContainer>
   );
 };
 

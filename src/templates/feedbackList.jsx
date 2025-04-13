@@ -1,74 +1,88 @@
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchFeedback } from "../reducers/feedback";
-import { deleteFeedbackAsync } from "../reducers/feedback";
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchFeedback, deleteFeedbackAsync } from '../reducers/feedback';
+
+import {
+  Box,
+  Typography,
+  Paper,
+  IconButton,
+  Stack,
+  Divider,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function FeedbackList() {
-
-  const {feedbacks} = useSelector((state) => state.feedback);
-
+  const { feedbacks } = useSelector((state) => state.feedback);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchFeedback());
   }, [dispatch]);
 
-  const onDelete = async (id) => { 
-      try {
-        await dispatch(deleteFeedbackAsync(id)).unwrap();
-      } catch (error) {
-        console.error("Ошибка при удалении:", error);
-      }
+  const onDelete = async (id) => {
+    try {
+      await dispatch(deleteFeedbackAsync(id)).unwrap();
+    } catch (error) {
+      console.error('Ошибка при удалении:', error);
+    }
   };
 
   return (
-    <div>
-      <br></br>
-      <h3>Отзывы</h3>
+    <Box mt={3}>
+      <Typography variant="h6" gutterBottom>
+        Отзывы
+      </Typography>
+
       {feedbacks.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#666' }}>
+        <Typography variant="body2" align="center" color="text.secondary">
           Пока нет отзывов
-        </p>
+        </Typography>
       ) : (
-        feedbacks.map(feedback => (
-          <div
+        feedbacks.map((feedback) => (
+          <Paper
             key={feedback.id}
-            style={{
-              backgroundColor:  '#f8f9fa',
-              padding: '15px',
-              marginBottom: '15px',
-              borderRadius: '8px',
-              border: `1px solid ${ '#ddd'}`
+            variant="outlined"
+            sx={{
+              p: 2,
+              mb: 2,
+              backgroundColor: '#f8f9fa',
+              borderRadius: 2,
             }}
           >
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              marginBottom: '10px'
-            }}>
-              <strong style={{ color:  '#000' }}>
-                {feedback.email}
-              </strong>    
-              <span style={{ color: '#666' }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={1}
+            >
+              <Typography fontWeight={600}>{feedback.email}</Typography>
+              <Typography variant="body2" color="text.secondary">
                 {feedback.date}
-              </span>
-            </div>
-            <div style={{ marginBottom: '10px' }}>
+              </Typography>
+            </Stack>
+
+            <Typography variant="body1" mb={1}>
               {feedback.message}
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              color:  '#666'
-            }}>
-            <button onClick={() => onDelete(feedback.id)}>удалить</button>
-            </div>
-          </div>
+            </Typography>
+
+            <Divider sx={{ mb: 1 }} />
+
+            <Stack direction="row" spacing={1} alignItems="center">
+              <IconButton
+                color="error"
+                size="small"
+                onClick={() => onDelete(feedback.id)}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+
+            </Stack>
+          </Paper>
         ))
       )}
-    </div>
+    </Box>
   );
 }
 
-export default FeedbackList; 
+export default FeedbackList;

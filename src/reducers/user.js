@@ -107,6 +107,7 @@ const userSlice = createSlice({
     loading: false,
     error: null,
     registred: null,
+    updated: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -131,6 +132,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = action.payload;
         state.error = null; 
+        state.updated = true;
       })
       .addCase(updateProfileAsync.rejected, (state, action) => {
         state.loading = false;
