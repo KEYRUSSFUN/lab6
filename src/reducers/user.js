@@ -101,6 +101,7 @@ const userSlice = createSlice({
   name: 'user',
   initialState: {
     isAuthenticated: null,
+    role: null,
     username: null,
     user: null,
     profile: null,
@@ -151,7 +152,6 @@ const userSlice = createSlice({
       .addCase(createAccountAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message;
-        console.log(action.payload);
       })
       .addCase(signinAccountAsync.pending, (state) => {
         state.loading = true;

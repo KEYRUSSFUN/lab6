@@ -2,7 +2,8 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_cors import CORS
+from functools import wraps
+from flask import abort
 
 app=Flask(__name__)
 
@@ -15,29 +16,86 @@ class Users(db.Model, UserMixin):
     email= db.Column(db.String(128), nullable=False, unique = True)
     username = db.Column(db.String(128), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-
+    role = db.Column(db.String(50), nullable=False, default='user')
+    is_active = db.Column(db.Boolean, default=True)
 
 class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False)
     message = db.Column(db.Text, nullable=False)
     date = db.Column(db.Text, nullable=False)
-
+    user_id = db.Column(db.Integer, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
     def serialize(self):
         return {
             'id': self.id,
             'email': self.email,
             'message': self.message,
-            'date' : self.date
+            'date' : self.date,
+            'user_id' : self.user_id,
+            'is_active' : self.is_active
         }
 
 app.config['SECRET_KEY']='2d75155246883f023ee10d89cfae0663e3515f9a'
 
 manager=LoginManager(app)
 
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
 @manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
+
+@app.get('/api/admin/users')
+@login_required
+@admin_required
+def api_admin_users():
+    users = Users.query.all()
+    return jsonify([
+        {
+            "id": u.id,
+            "email": u.email,
+            "username": u.username,
+            "role": u.role,
+            "is_active": u.is_active,
+            "is_self": u.id == current_user.id
+        } for u in users
+    ])
+
+@app.route('/api/admin/delete/<int:user_id>', methods=['DELETE'])
+@admin_required
+def delete_user(user_id):
+    user = Users.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        abort(403)
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({"success": True})
+
+@app.route('/api/admin/block/<int:user_id>', methods=['PUT'])
+@admin_required
+def block_user(user_id):
+    user = Users.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        abort(403)
+    user.is_active = False
+    db.session.commit()
+    return jsonify({"success": True})
+
+@app.route('/api/admin/unblock/<int:user_id>', methods=['PUT'])
+@admin_required
+def unblock_user(user_id):
+    user = Users.query.get_or_404(user_id)
+    user.is_active = True
+    db.session.commit()
+    return jsonify({"success": True})
 
 @app.route('/api/feedback', methods=['GET'])
 def get_feedback():
@@ -47,7 +105,7 @@ def get_feedback():
 @app.route('/api/feedback', methods=['POST'])
 def create_feedback():
     data = request.get_json()
-    new_feedback = Feedback(email=data['email'], message=data['message'], date = data['date'])
+    new_feedback = Feedback(email=data['email'], message=data['message'], date = data['date'], user_id=data['user_id'])
     db.session.add(new_feedback)
     db.session.commit()
     return jsonify(new_feedback.serialize()), 201
@@ -61,6 +119,29 @@ def delete_feedback(feedback_id):
     db.session.commit()
     return '', 204
 
+@app.route('/api/feedback/block/<int:feedback_id>', methods=['PUT'])
+def block_feedback(feedback_id):
+    feedback = Feedback.query.get(feedback_id)
+    if not feedback:
+        return jsonify({'error': 'Отзыв не найден'}), 404
+
+    feedback.is_active = False
+    db.session.commit()
+
+    return jsonify({'message': 'Отзыв заблокирован', 'feedback': feedback.serialize()})
+
+@app.route('/api/feedback/unblock/<int:feedback_id>', methods=['PUT'])
+def unblock_feedback(feedback_id):
+    feedback = Feedback.query.get(feedback_id)
+    if not feedback:
+        return jsonify({'error': 'Отзыв не найден'}), 404
+
+    feedback.is_active = True
+    db.session.commit()
+
+    return jsonify({'message': 'Отзыв заблокирован', 'feedback': feedback.serialize()})
+
+
 @app.route('/api/profile', methods=['GET'])
 @login_required
 def get_profile():
@@ -73,6 +154,8 @@ def get_profile():
         'id': user.id,
         'username': user.username,
         'email': user.email,
+        'role' : user.role,
+        'is_active' : user.is_active,
     }
 
     return jsonify(profile), 200
@@ -120,6 +203,8 @@ def login_page():
         password = item['password']
         if email and password:
             user = Users.query.filter_by(email=email).first()
+            if user.is_active == False:
+                return jsonify({'success': False, 'error': 'Пользователь заблокирован'}), 201
             if user and check_password_hash(user.password, password):
                 login_user(user)
                 return jsonify({'success': True, 'message': 'Вход успешен'}), 200

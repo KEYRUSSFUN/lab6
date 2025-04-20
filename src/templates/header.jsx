@@ -227,6 +227,8 @@ const Header = () => {
                           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                         >
                           <MenuItem onClick={() => { navigate("/profile"); }}>Профиль</MenuItem>
+                          
+                          {profile && profile.role == 'admin' && <MenuItem onClick={() => { navigate("/admin_panel"); }}>Панель администрирования</MenuItem>}
                           <MenuItem onClick={() => { handleProfileClose(); onLogout(); }}>Выйти</MenuItem>
                         </Menu>
                       </AuthSide>

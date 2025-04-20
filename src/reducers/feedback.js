@@ -27,6 +27,24 @@ export const createFeedbackAsync = createAsyncThunk(
     }
   );
 
+export const blockFeedbackAsync = createAsyncThunk(
+  'feedback/block',
+  async (id) => {
+    await axios.put(`/api/feedback/block/${id}`);
+    return id;
+  }
+);
+
+export const unblockFeedbackAsync = createAsyncThunk(
+  'feedback/unblock',
+  async (id) => {
+    await axios.put(`/api/feedback/unblock/${id}`);
+    return id;
+  }
+);
+
+  
+
 const feedbackSlice = createSlice({
   name: 'feedbacks',
   initialState: {

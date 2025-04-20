@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import FeedbackList from './feedbackList';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createFeedbackAsync } from '../reducers/feedback';
 
 import {
@@ -43,6 +43,8 @@ const FeedbackForm = () => {
     formState: { errors },
   } = useForm();
 
+  const {profile } = useSelector((state) => state.user);
+
   const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
@@ -52,6 +54,7 @@ const FeedbackForm = () => {
           email: data.email,
           message: data.message,
           date: new Date().toLocaleDateString() + '',
+          user_id: profile.id,
         })
       ).unwrap();
       reset();
