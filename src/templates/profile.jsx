@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchProfile, updateProfileAsync } from '../reducers/user';
 import { useNavigate } from 'react-router-dom';
+import { useFetchProfileQuery, useUpdateProfileMutation } from '../reducers/user';
 import Loader from "../assets/img/loadingCircle.svg";
 
 import { styled } from '@mui/material/styles';
@@ -12,10 +11,6 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import MuiAlert from '@mui/material/Alert';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import IconButton from '@mui/material/IconButton';
-
 
 const ProfileContainer = styled(Container)(({ theme }) => ({
     maxWidth: '600px',
@@ -25,7 +20,6 @@ const ProfileContainer = styled(Container)(({ theme }) => ({
     backgroundColor: '#fff',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
     [theme.breakpoints.down('sm')]: {
-        
         padding: theme.spacing(2),
     },
 }));
@@ -116,29 +110,33 @@ const Alert = styled(MuiAlert)(({ theme }) => ({
 
 const Profile = () => {
     const { register, handleSubmit, setValue, formState: { errors } } = useForm();
-    const { isAuthenticated, profile, loading, error, updated } = useSelector((state) => state.user);
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        dispatch(fetchProfile());
-    }, [dispatch]);
+    const { data: profile, isLoading: loading, error, refetch } = useFetchProfileQuery();
+    const [updateProfile, { isLoading: isUpdating, isSuccess: isUpdated }] = useUpdateProfileMutation();
 
     useEffect(() => {
-        if (profile) {
-            setValue('username', profile.username || '');
-            setValue('email', profile.email || '');
-        }
-        if (!isAuthenticated) {
-            navigate("/");
-        }
-    }, [profile, isAuthenticated, navigate, setValue]);
+        if (!profile) return;
+        setValue('username', profile.username || '');
+        setValue('email', profile.email || '');
+    }, [profile, setValue]);
 
-    const onSubmit = (data) => {
+    useEffect(() => {
+        if (!profile) {
+            navigate('/');
+        }
+    }, [profile, navigate]);
+
+    const onSubmit = async (data) => {
         if (profile) {
-            dispatch(updateProfileAsync({ id: profile.id, profileData: data }));
+            try {
+                await updateProfile({ id: profile.id, profileData: data }).unwrap();
+                refetch();
+            } catch (error) {
+                console.error('Failed to update profile:', error);
+            }
         } else {
-            console.warn("Профиль ещё не загружен");
+            console.warn('Profile data is not available');
         }
     };
 
@@ -179,20 +177,22 @@ const Profile = () => {
                 </ProfileEmailContainer>
 
                 <ProfileButton type="submit" variant="contained">
-                    {loading ? <LoadingImage src={Loader} alt="Загрузка..." /> : "Сохранить изменения"}
+                    {isUpdating ? <LoadingImage src={Loader} alt="Загрузка..." /> : "Сохранить изменения"}
                 </ProfileButton>
-                {loading ? (
+
+                {loading && (
                     <Box display="flex" justifyContent="center" mt={2}>
-                    <LoadingImage src={Loader} alt="Загрузка..." />
+                        <LoadingImage src={Loader} alt="Загрузка..." />
                     </Box>
-                ) : (
-                    error && (
-                    <Alert severity="error">
-                        {error}
-                    </Alert>
-                    )
                 )}
-                 {updated && (
+
+                {error && (
+                    <Alert severity="error">
+                        {error.message || 'Произошла ошибка при загрузке данных.'}
+                    </Alert>
+                )}
+
+                {isUpdated && (
                     <Alert severity="success">
                         Данные обновлены
                     </Alert>

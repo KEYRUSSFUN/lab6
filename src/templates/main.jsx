@@ -8,7 +8,8 @@ import LabPage from './labPages';
 import Footer from './footer';
 import FeedbackForm from '../templates/feedback.jsx';
 import AdminPanel from './adminPanel.jsx';
-
+import MyButton from './test/MyButton.jsx';
+import HomePage from './HomePage.jsx';
 
 const Main = () => {
   return (
@@ -16,6 +17,7 @@ const Main = () => {
     <Header />
     <div className="content-container" style={{paddingBottom: '56px'}} >
     <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/about" element={<About />} />
         <Route path="/feedback" element={<FeedbackForm />} />

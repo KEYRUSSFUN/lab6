@@ -1,9 +1,8 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { signinAccountAsync, fetchProfile } from '../reducers/user';
+import { useSigninAccountMutation, useFetchProfileQuery } from '../reducers/user';
 import Logo from "../assets/logo/FASTFOODLOGO.svg";
 import Loader from "../assets/img/loadingCircle.svg";
 
@@ -14,7 +13,6 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import MuiAlert from '@mui/material/Alert';
-
 
 const LoginPageContainer = styled(Box)({
   fontFamily: "'Roboto', sans-serif",
@@ -127,16 +125,19 @@ const LoadingImage = styled('img')({
     height: '40px',
 });
 
-
 const LoginForm = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { isAuthenticated, error, loading } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Используем хук для мутации входа
+  const [signinAccount, { isLoading: isSigninLoading, error: signinError }] = useSigninAccountMutation();
+
+  const { refetch: fetchProfile } = useFetchProfileQuery({}, { skip: true });
 
   const onSubmit = async (data) => {
     try {
-      await dispatch(signinAccountAsync({ email: data.email, password: data.password })).unwrap();
+      await signinAccount({ email: data.email, password: data.password }).unwrap();
     } catch (err) {
       console.error("Ошибка при входе:", err);
     }
@@ -144,15 +145,14 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchProfile());
+      fetchProfile(); // Загружаем профиль после успешной аутентификации
       navigate('/');
     }
-  }, [isAuthenticated, navigate, dispatch]);
+  }, [isAuthenticated, navigate, fetchProfile]);
 
   const toRegister = () => {
     navigate("/signup");
   };
-
 
   return (
     <LoginPageContainer component="main">
@@ -177,7 +177,6 @@ const LoginForm = () => {
             })}
             error={!!errors.email}
             helperText={errors.email ? errors.email.message : ""}
-          
           />
 
           <StyledTextField
@@ -194,28 +193,27 @@ const LoginForm = () => {
             })}
             error={!!errors.password}
             helperText={errors.password ? errors.password.message : ""}
-          
           />
 
           <SigninButton type="submit" variant="contained" fullWidth>
             Войти
           </SigninButton>
 
-          {loading ? (
+          {isSigninLoading ? (
             <Box display="flex" justifyContent="center" mt={2}>
               <LoadingImage src={Loader} alt="Загрузка..." />
             </Box>
           ) : (
-            error && (
+            signinError && (
               <Alert severity="error">
-                {error}
+                {signinError?.data?.message || 'Ошибка при входе'}
               </Alert>
             )
           )}
         </form>
 
         <Box display="flex" justifyContent="center" mt={3}>
-          <RegisterLink onClick={toRegister} style={{cursor: 'pointer'}}>
+          <RegisterLink onClick={toRegister} style={{ cursor: 'pointer' }}>
             Зарегистрироваться
           </RegisterLink>
         </Box>

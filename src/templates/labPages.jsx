@@ -3,6 +3,7 @@ import { Box, Typography, Container } from '@mui/material';
 import Lab2 from './labs/Lab2';
 import Lab3 from './labs/Lab3';
 import Lab4 from './labs/Lab4';
+import MyButton from './test/MyButton';
 
 const Lab1 = () => <Typography>Контент лабораторной 1</Typography>;
 

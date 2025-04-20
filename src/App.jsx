@@ -1,20 +1,23 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import LoginForm from './templates/login.jsx';
 import RegisterForm from './templates/register.jsx';
 import Main from './templates/main.jsx';
 
-import { checkSessionAsync,fetchProfile } from './reducers/user.js';
+import { useCheckSessionQuery, useFetchProfileQuery } from './reducers/user'; // Используем хуки из RTK Query
 
 function App() {
+  const { data: session, isLoading: sessionLoading } = useCheckSessionQuery(); // Хук для проверки сессии
+  const { data: profile, isLoading: profileLoading } = useFetchProfileQuery(); // Хук для получения профиля
 
-  const dispatch = useDispatch();
-
+  // Проверка, если сессия или профиль еще не загружены
   useEffect(() => {
-    dispatch(checkSessionAsync());
-    dispatch(fetchProfile());
-  }, [dispatch]);
+    if (!sessionLoading && !profileLoading && !session) {
+      // Если сессия не активна, перенаправляем на страницу входа
+      window.location.href = '/signin';
+    }
+  }, [sessionLoading, profileLoading, session]);
 
   return (
     <div>

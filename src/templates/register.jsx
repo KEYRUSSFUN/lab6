@@ -1,9 +1,7 @@
-
 import React, { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { createAccountAsync } from '../reducers/user';
+import { useCreateAccountMutation } from '../reducers/user';
 import Logo from "../assets/logo/FASTFOODLOGO.svg";
 import Loader from "../assets/img/loadingCircle.svg";
 
@@ -146,20 +144,22 @@ const LoadingImage = styled('img')({
 const Alert = styled(MuiAlert)({
     marginTop: '10px',
     marginBottom: '10px',
-});
+})
 
 const RegisterForm = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
-    const { loading, error, registred } = useSelector((state) => state.user);
+    const [createAccount, { isLoading, error, isSuccess }] = useCreateAccountMutation();
     const navigate = useNavigate();
     
     const password = watch('password');
 
-    const dispatch = useDispatch();
-
     const onSubmit = useCallback((data) => {
-        dispatch(createAccountAsync({ name: data.username, email: data.email, password: data.password }));
-    }, [dispatch]);
+        createAccount({
+            name: data.username,
+            email: data.email,
+            password: data.password,
+        });
+    }, [createAccount]);
 
     const toLogin = () => {
         navigate("/signin");
@@ -235,16 +235,16 @@ const RegisterForm = () => {
                         />
 
                         <RegisterButton type="submit" variant="contained" fullWidth>
-                            {loading ? <LoadingImage src={Loader} alt="Загрузка..." /> : "Зарегистрироваться"}
+                            {isLoading ? <LoadingImage src={Loader} alt="Загрузка..." /> : "Зарегистрироваться"}
                         </RegisterButton>
 
                         {error && (
                             <Alert severity="error">
-                                {error}
+                                {error.message || "Ошибка при регистрации"}
                             </Alert>
                         )}
 
-                        {registred && (
+                        {isSuccess && (
                             <Alert severity="success">
                                 Успешная регистрация
                             </Alert>

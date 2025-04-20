@@ -1,12 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
-import feedbackReducer from "../reducers/feedback";
-import userReducer from "../reducers/user";
+import { feedbackApi } from '../reducers/feedback'; 
+import { userApi } from "../reducers/user";
 import counterSlice from '../reducers/counterSlice';
 
 export const store = configureStore({
   reducer: {
-    feedback: feedbackReducer,
-    user: userReducer,
+    [feedbackApi.reducerPath]: feedbackApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
     counter: counterSlice,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware()
+      .concat(feedbackApi.middleware)
+      .concat(userApi.middleware),
 });

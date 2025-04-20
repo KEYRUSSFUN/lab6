@@ -1,9 +1,9 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import FeedbackList from './feedbackList';
-import { useDispatch, useSelector } from 'react-redux';
-import { createFeedbackAsync } from '../reducers/feedback';
-
+import { useCreateFeedbackMutation } from '../reducers/feedback';
+import { useFetchProfileQuery } from '../reducers/user';
+import { useFetchFeedbackQuery } from '../reducers/feedback';
 import {
   Button,
   TextField,
@@ -43,21 +43,36 @@ const FeedbackForm = () => {
     formState: { errors },
   } = useForm();
 
-  const {profile } = useSelector((state) => state.user);
 
-  const dispatch = useDispatch();
+  const { data: profile, error: profileError, isLoading: isProfileLoading } = useFetchProfileQuery();
+  const {refetch: refetchFeedbacks } = useFetchFeedbackQuery();
+  const [createFeedback] = useCreateFeedbackMutation(); 
 
+
+  if (isProfileLoading) {
+    return <Typography>Загрузка профиля...</Typography>;
+  }
+
+  if (profileError) {
+    return <Typography>Ошибка загрузки профиля: {profileError.message}</Typography>;
+  }
+
+  if (!profile) {
+    return <Typography>Профиль не найден. Пожалуйста, войдите в систему.</Typography>;
+  }
+
+  
   const onSubmit = async (data) => {
     try {
-      await dispatch(
-        createFeedbackAsync({
-          email: data.email,
-          message: data.message,
-          date: new Date().toLocaleDateString() + '',
-          user_id: profile.id,
-        })
-      ).unwrap();
+
+      await createFeedback({
+        email: data.email,
+        message: data.message,
+        date: new Date().toLocaleDateString(),
+        user_id: profile.id,
+      }).unwrap(); 
       reset();
+      refetchFeedbacks();
     } catch (error) {
       console.error('Ошибка при отправке:', error);
     }
@@ -109,7 +124,7 @@ const FeedbackForm = () => {
       </Box>
 
       <Box mt={4}>
-        <FeedbackList />
+        <FeedbackList refetch={refetchFeedbacks} />
       </Box>
     </Container>
   );

@@ -1,49 +1,48 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice } from '@reduxjs/toolkit';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+export const feedbackApi = createApi({
+  reducerPath: 'feedbackApi',
+  baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
+  endpoints: (builder) => ({
+    fetchFeedback: builder.query({
+      query: () => 'feedback',
+    }),
+    deleteFeedback: builder.mutation({
+      query: (id) => ({
+        url: `feedback/${id}`,
+        method: 'DELETE',
+      }),
+    }),
+    createFeedback: builder.mutation({
+      query: (feedback) => ({
+        url: 'feedback',
+        method: 'POST',
+        body: feedback,
+      }),
+    }),
+    blockFeedback: builder.mutation({
+      query: (id) => ({
+        url: `feedback/block/${id}`,
+        method: 'PUT',
+      }),
+    }),
+    unblockFeedback: builder.mutation({
+      query: (id) => ({
+        url: `feedback/unblock/${id}`,
+        method: 'PUT',
+      }),
+    }),
+  }),
+});
 
-export const fetchFeedback = createAsyncThunk(
-  'feedback/fetchFeedback',
-  async () => {
-    const response = await axios.get(`/api/feedback`);
-    return response.data;
-  }
-);
-
-export const deleteFeedbackAsync = createAsyncThunk(
-    'feedback/deleteFeedback',
-    async (id) => {
-      await axios.delete(`/api/feedback/${id}`);
-      console.log(id);
-      return id;
-    }
-  );
-
-export const createFeedbackAsync = createAsyncThunk(
-    'feedback/createFeedback',
-    async (feedback) => {
-      const response = await axios.post(`/api/feedback`, feedback);
-      return response.data;
-    }
-  );
-
-export const blockFeedbackAsync = createAsyncThunk(
-  'feedback/block',
-  async (id) => {
-    await axios.put(`/api/feedback/block/${id}`);
-    return id;
-  }
-);
-
-export const unblockFeedbackAsync = createAsyncThunk(
-  'feedback/unblock',
-  async (id) => {
-    await axios.put(`/api/feedback/unblock/${id}`);
-    return id;
-  }
-);
-
-  
+export const {
+  useFetchFeedbackQuery,
+  useDeleteFeedbackMutation,
+  useCreateFeedbackMutation,
+  useBlockFeedbackMutation,
+  useUnblockFeedbackMutation,
+} = feedbackApi;
 
 const feedbackSlice = createSlice({
   name: 'feedbacks',
@@ -55,39 +54,24 @@ const feedbackSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchFeedback.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchFeedback.fulfilled, (state, action) => {
-        state.loading = false;
-        state.feedbacks = action.payload;
-      })
-      .addCase(fetchFeedback.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      })
-      .addCase(deleteFeedbackAsync.pending, (state) => {
-          state.loading = true;
-      })
-      .addCase(deleteFeedbackAsync.fulfilled, (state, action) => {
-          state.loading = false;
+      .addMatcher(
+        feedbackApi.endpoints.fetchFeedback.matchFulfilled,
+        (state, action) => {
+          state.feedbacks = action.payload;
+        }
+      )
+      .addMatcher(
+        feedbackApi.endpoints.deleteFeedback.matchFulfilled,
+        (state, action) => {
           state.feedbacks = state.feedbacks.filter(f => f.id !== action.payload);
-      })
-      .addCase(deleteFeedbackAsync.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.error.message;
-      })
-      .addCase(createFeedbackAsync.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(createFeedbackAsync.fulfilled, (state, action) => {
-          state.loading = false;
-          state.feedbacks = [...state.feedbacks, action.payload];
-      })
-      .addCase(createFeedbackAsync.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.error.message;
-      });
+        }
+      )
+      .addMatcher(
+        feedbackApi.endpoints.createFeedback.matchFulfilled,
+        (state, action) => {
+          state.feedbacks.push(action.payload);
+        }
+      );
   },
 });
 

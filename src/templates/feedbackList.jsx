@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react'; 
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  fetchFeedback,
-  deleteFeedbackAsync,
+  useFetchFeedbackQuery,
+  useDeleteFeedbackMutation,
 } from '../reducers/feedback';
 
 import {
@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import { useFetchProfileQuery} from '../reducers/user';
 import { FixedSizeList as List } from 'react-window';
 
 const OuterElementType = React.forwardRef(({ style, ...props }, ref) => (
@@ -27,20 +27,17 @@ const OuterElementType = React.forwardRef(({ style, ...props }, ref) => (
 ));
 
 function FeedbackList() {
-  const { feedbacks } = useSelector((state) => state.feedback);
-  const { profile } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(fetchFeedback());
-  }, [dispatch]);
+  const { data: feedbacks = [], error, isLoading, refetch } = useFetchFeedbackQuery(); 
+  const { data: profile } = useFetchProfileQuery();
+  const [deleteFeedback] = useDeleteFeedbackMutation(); 
 
   const canDelete = (feedback) =>
-    profile && feedback.user_id === profile.id;
+    profile && feedback.user_id === profile.id; 
 
   const onDelete = async (id) => {
     try {
-      await dispatch(deleteFeedbackAsync(id)).unwrap();
+      await deleteFeedback(id).unwrap();
+      refetch();
     } catch (error) {
       console.error('Ошибка при удалении:', error);
     }
@@ -108,8 +105,11 @@ function FeedbackList() {
     );
   };
 
+  if (isLoading) return <Typography>Загрузка...</Typography>;
+  if (error) return <Typography>Ошибка загрузки данных: {error.message}</Typography>;
+
   return (
-    <Box mt={3} pb={10} sx={{ width: '100%', maxWidth: '890px'}}>
+    <Box mt={3} pb={10} sx={{ width: '100%' }}>
       <Typography variant="h6" gutterBottom>
         Отзывы
       </Typography>

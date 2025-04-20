@@ -1,15 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  fetchFeedback,
-  deleteFeedbackAsync,
-  blockFeedbackAsync,
-  unblockFeedbackAsync
+  useFetchFeedbackQuery,
+  useDeleteFeedbackMutation,
+  useBlockFeedbackMutation,
+  useUnblockFeedbackMutation
 } from '../reducers/feedback';
-import {
-  useTable
-} from 'react-table';
-
+import { useTable } from 'react-table';
 import {
   Box,
   Typography,
@@ -18,25 +15,24 @@ import {
   TableCell,
   Paper,
   IconButton,
-  Tooltip
+  Tooltip,
+  CircularProgress
 } from '@mui/material';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-
+import { useFetchProfileQuery } from '../reducers/user';
 import { FixedSizeList as List } from 'react-window';
 
 function FeedbackAdminList() {
-  const dispatch = useDispatch();
-  const { feedbacks } = useSelector((state) => state.feedback);
-  const { profile } = useSelector((state) => state.user);
-  const [colWidths, setColWidths] = useState([]);
+  const { data: feedbacks, error: feedbackError, isLoading: feedbackLoading, refetch } = useFetchFeedbackQuery();
+  const { data: profile, isLoading: profileLoading, error: profileError} = useFetchProfileQuery();
+  const [deleteFeedback] = useDeleteFeedbackMutation();
+  const [blockFeedback] = useBlockFeedbackMutation();
+  const [unblockFeedback] = useUnblockFeedbackMutation();
   const headerRefs = useRef([]);
-
-  useEffect(() => {
-    dispatch(fetchFeedback());
-  }, [dispatch]);
+  const [colWidths, setColWidths] = useState([]);
 
   const canDelete = (feedback) =>
     profile && (feedback.user_id === profile.id || profile.role === 'admin');
@@ -46,8 +42,8 @@ function FeedbackAdminList() {
 
   const onDelete = async (id) => {
     try {
-      await dispatch(deleteFeedbackAsync(id)).unwrap();
-      dispatch(fetchFeedback());
+      await deleteFeedback(id).unwrap();
+      refetch();
     } catch (error) {
       console.error('Ошибка при удалении:', error);
     }
@@ -55,8 +51,8 @@ function FeedbackAdminList() {
 
   const onBlock = async (feedback) => {
     try {
-      await dispatch(blockFeedbackAsync(feedback.id)).unwrap();
-      dispatch(fetchFeedback());
+      await blockFeedback(feedback.id).unwrap();
+      refetch();
     } catch (error) {
       console.error('Ошибка при блокировке:', error);
     }
@@ -64,8 +60,8 @@ function FeedbackAdminList() {
 
   const onUnblock = async (feedback) => {
     try {
-      await dispatch(unblockFeedbackAsync(feedback.id)).unwrap();
-      dispatch(fetchFeedback());
+      await unblockFeedback(feedback.id).unwrap();
+      refetch();
     } catch (error) {
       console.error('Ошибка при разблокировке:', error);
     }
@@ -141,7 +137,7 @@ function FeedbackAdminList() {
     prepareRow,
   } = useTable({
     columns,
-    data: feedbacks,
+    data: feedbacks || [],
   });
 
   useEffect(() => {
@@ -151,13 +147,17 @@ function FeedbackAdminList() {
     }
   }, [feedbacks]);
 
+  if (profileLoading || feedbackLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><CircularProgress /></Box>;
+
+  if (feedbackError || profileError) return <Typography>Ошибка загрузки данных</Typography>;
+
   return (
     <Box mt={3}>
       <Typography variant="h6" gutterBottom>
         Отзывы
       </Typography>
 
-      {feedbacks.length === 0 ? (
+      {feedbacks && feedbacks.length === 0 ? (
         <Typography variant="body2" align="center" color="text.secondary">
           Пока нет отзывов
         </Typography>
@@ -182,39 +182,34 @@ function FeedbackAdminList() {
           </Box>
 
           {colWidths.length > 0 && (
-              <Box sx={{ height: 500 }}>
-                <List
-                  height={500}
-                  itemCount={rows.length}
-                  itemSize={60}
-                  width="100%"
-                >
-                  {({ index, style }) => {
-                    const row = rows[index];
-                    prepareRow(row);
-                    return (
-                      <TableRow {...row.getRowProps({ style })}>
-                        {row.cells.map((cell, colIdx) => (
-                          <TableCell
-                            {...cell.getCellProps()}
-                            key={cell.column.id}
-                            sx={{
-                              width: colWidths[colIdx],
-                              maxWidth: colWidths[colIdx],
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {cell.render('Cell')}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    );
-                  }}
-                </List>
-              </Box>
-            )}
+            <Box sx={{ height: 500 }}>
+              <List height={500} itemCount={rows.length} itemSize={60} width="100%">
+                {({ index, style }) => {
+                  const row = rows[index];
+                  prepareRow(row);
+                  return (
+                    <TableRow {...row.getRowProps({ style })}>
+                      {row.cells.map((cell, colIdx) => (
+                        <TableCell
+                          {...cell.getCellProps()}
+                          key={cell.column.id}
+                          sx={{
+                            width: colWidths[colIdx],
+                            maxWidth: colWidths[colIdx],
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {cell.render('Cell')}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                }}
+              </List>
+            </Box>
+          )}
         </TableContainer>
       )}
     </Box>

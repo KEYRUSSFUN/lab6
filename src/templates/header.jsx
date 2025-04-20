@@ -3,7 +3,7 @@ import Logo from "../assets/logo/FASTFOODLOGO.svg";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import Loader from "../assets/img/loadingCircle.svg";
-import { Logout } from '../reducers/user';
+import { useSigninAccountMutation, useLogoutMutation, useFetchProfileQuery } from '../reducers/user';
 import MenuIcon from '@mui/icons-material/Menu';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -123,8 +123,8 @@ const MenuItemStyle = styled('li')({
 });
 
 const Header = () => {
-    const dispatch = useDispatch();
-    const { isAuthenticated, profile } = useSelector((state) => state.user);
+    const [logout] = useLogoutMutation(); // Using RTK Query mutation for logout
+    const { data: profile, isLoading, isError } = useFetchProfileQuery(); // Using RTK Query query for profile
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -134,12 +134,12 @@ const Header = () => {
 
     const onLogout = useCallback(async () => {
         try {
-            await dispatch(Logout()).unwrap();
+            await logout().unwrap(); // Calling the RTK Query mutation
             navigate('/signin');
         } catch (error) {
             console.error("Ошибка при выходе:", error);
         }
-    }, [dispatch, navigate]);
+    }, [logout, navigate]);
 
     const handleProfileClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -211,10 +211,10 @@ const Header = () => {
                   )}
 
                   {!isMobile ? (
-                    isAuthenticated ? (
+                    profile ? (
                       <AuthSide>
                         <Typography variant="body1" sx={{ mr: 1 }}>
-                          {profile ? profile.username : <img className='spinner' src={Loader} alt="Loading..." />}
+                          {profile.username}
                         </Typography>
                         <IconButton onClick={handleProfileClick}>
                           <ProfileAvatar />
@@ -227,8 +227,7 @@ const Header = () => {
                           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                         >
                           <MenuItem onClick={() => { navigate("/profile"); }}>Профиль</MenuItem>
-                          
-                          {profile && profile.role == 'admin' && <MenuItem onClick={() => { navigate("/admin_panel"); }}>Панель администрирования</MenuItem>}
+                          {profile.role === 'admin' && <MenuItem onClick={() => { navigate("/admin_panel"); }}>Панель администрирования</MenuItem>}
                           <MenuItem onClick={() => { handleProfileClose(); onLogout(); }}>Выйти</MenuItem>
                         </Menu>
                       </AuthSide>
@@ -270,7 +269,7 @@ const Header = () => {
                     </ListItemButton>
                   </ListItem>
                   )}
-                  {isMobile && isAuthenticated && (
+                  {isMobile && profile && (
                     <>
                       <ListItem disablePadding>
                         <ListItemButton onClick={() => navigate("/profile")}>
@@ -283,8 +282,8 @@ const Header = () => {
                         </ListItemButton>
                       </ListItem>
                     </>
-                  )} 
-                  {isMobile && !isAuthenticated && (
+                  )}
+                  {isMobile && !profile && (
                     <>
                       <ListItem disablePadding>
                         <ListItemButton component={RouterLink} to="/signin">

@@ -12,5 +12,12 @@ export default defineConfig({
         secure: false, // If your backend uses HTTPS with a self-signed certificate
       }
     }
-  }
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    include: ['src/**/*.test.jsx'],
+    setupFiles: './src/setupTests.js',
+  },
+  
 })
