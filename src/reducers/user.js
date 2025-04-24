@@ -1,4 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 
 export const userApi = createApi({
@@ -65,7 +67,6 @@ export const userApi = createApi({
   }),
 });
 
-// Экспортируем хуки для использования в компонентах
 export const {
   useFetchProfileQuery,
   useUpdateProfileMutation,
@@ -77,3 +78,39 @@ export const {
   useLogoutMutation,
   useFetchUsersQuery,
 } = userApi;
+
+
+export const checkSessionAsync = createAsyncThunk(
+  'auth/checkSession',
+  async () => {
+      const response = await axios.get(`/api/session`, {withCredentials: true});
+      return response.data;
+  }
+);
+
+const sessionSlice = createSlice({
+  name: 'feedback',
+  initialState: {
+    isAuthenticated: null,
+    loading: false,
+    error: null,
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(checkSessionAsync.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(checkSessionAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = action.payload.authenticated;
+      })
+      .addCase(checkSessionAsync.rejected, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.error = 'Ошибка входа';
+      })
+  },
+});
+
+export default sessionSlice.reducer;

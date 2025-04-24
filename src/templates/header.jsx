@@ -123,8 +123,8 @@ const MenuItemStyle = styled('li')({
 });
 
 const Header = () => {
-    const [logout] = useLogoutMutation(); // Using RTK Query mutation for logout
-    const { data: profile, isLoading, isError } = useFetchProfileQuery(); // Using RTK Query query for profile
+    const [logout] = useLogoutMutation(); 
+    const { data: profile, isLoading, isError } = useFetchProfileQuery(); 
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -134,7 +134,7 @@ const Header = () => {
 
     const onLogout = useCallback(async () => {
         try {
-            await logout().unwrap(); // Calling the RTK Query mutation
+            await logout().unwrap();
             navigate('/signin');
         } catch (error) {
             console.error("Ошибка при выходе:", error);

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useSigninAccountMutation, useFetchProfileQuery } from '../reducers/user';
+import { useSigninAccountMutation, useFetchProfileQuery, checkSessionAsync} from '../reducers/user';
 import Logo from "../assets/logo/FASTFOODLOGO.svg";
 import Loader from "../assets/img/loadingCircle.svg";
 
@@ -127,28 +127,23 @@ const LoadingImage = styled('img')({
 
 const LoginForm = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { isAuthenticated, error, loading } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // Используем хук для мутации входа
   const [signinAccount, { isLoading: isSigninLoading, error: signinError }] = useSigninAccountMutation();
 
-  const { refetch: fetchProfile } = useFetchProfileQuery({}, { skip: true });
-
+  
   const onSubmit = async (data) => {
     try {
       await signinAccount({ email: data.email, password: data.password }).unwrap();
+      const result = await dispatch(checkSessionAsync()).unwrap();
+      if (result?.authenticated) {
+        navigate('/');
+      }
     } catch (err) {
       console.error("Ошибка при входе:", err);
     }
   };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchProfile(); // Загружаем профиль после успешной аутентификации
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate, fetchProfile]);
 
   const toRegister = () => {
     navigate("/signup");
